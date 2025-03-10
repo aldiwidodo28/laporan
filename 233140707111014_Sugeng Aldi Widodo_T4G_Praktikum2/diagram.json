@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "author": "Sugeng Aldi Widodo",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -400, "left": -300, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -105.3,
+      "left": 349.8,
+      "attrs": { "humidity": "85.0", "temperature": "25.0" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": 473.6,
+      "left": -575.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 503.15,
+      "left": -652.8,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd1",
+      "top": -99.2,
+      "left": -349.6,
+      "attrs": { "pins": "i2c" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:3V3", "dht1:VCC", "red", [ "h-20", "v-80", "h50" ] ],
+    [ "dht1:GND", "esp:GND.2", "black", [ "v10", "h50", "v80" ] ],
+    [ "esp:4", "dht1:DATA", "green", [ "h50", "v-110", "h-90" ] ],
+    [ "esp:3V3", "ldr1:VCC", "red", [ "h-180", "v70" ] ],
+    [ "ldr1:AO", "esp:34", "green", [ "h-10", "v-100" ] ],
+    [ "ldr1:GND", "esp:GND.1", "black", [ "h120", "v-400" ] ],
+    [ "lcd1:GND", "esp:GND.1", "violet", [ "h-80", "v200", "h-180", "v-70" ] ],
+    [ "lcd1:VCC", "esp:5V", "orange", [ "h-70", "v200", "h-170", "v-30" ] ],
+    [ "lcd1:SDA", "esp:21", "limegreen", [ "h-60", "v50" ] ],
+    [ "lcd1:SCL", "esp:22", "cyan", [ "h-50", "v10" ] ],
+    [ "dht1:SDA", "esp:4", "green", [ "v-1.7", "h-64.9", "v-403.2", "h0", "v0", "h-201.6" ] ]
+  ],
+  "dependencies": {}
+}
