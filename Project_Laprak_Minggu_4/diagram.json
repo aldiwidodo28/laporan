@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "author": "Aldi",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 50, "left": 150, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -166.4,
+      "left": -52,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 246.2,
+      "left": 28.8,
+      "attrs": { "color": "green", "xray": "1", "label": "Prev" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 246.2,
+      "left": 259.2,
+      "attrs": { "color": "yellow", "xray": "1", "label": "Next" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "lcd1:SCL", "esp:D22", "green", [ "v40", "h-40", "v90" ] ],
+    [ "lcd1:SDA", "esp:D21", "green", [ "v50", "h-60", "v80" ] ],
+    [ "lcd1:VCC", "esp:3V3", "red", [ "v60", "h-30", "v70" ] ],
+    [ "lcd1:GND", "esp:GND.1", "black", [ "v70", "h-20", "v60" ] ],
+    [ "btn1:1.l", "esp:D14", "red", [ "h10", "v-100", "h120" ] ],
+    [ "btn1:2.l", "esp:GND.2", "black", [ "h0", "v-50", "h150" ] ],
+    [ "btn2:1.l", "esp:D12", "blue", [ "h10", "v-80", "h-80", "v-80" ] ],
+    [ "btn2:2.l", "esp:GND.2", "black", [ "h0", "v-40", "h-110" ] ]
+  ],
+  "dependencies": {}
+}
