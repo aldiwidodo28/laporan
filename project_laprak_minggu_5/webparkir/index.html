@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Monitoring ESP32 IR & Servo</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #74ebd5, #acb6e5);
+        margin: 0;
+        padding: 40px 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+      }
+      .container {
+        background-color: #ffffffee;
+        padding: 30px 50px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+      }
+      h1 {
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 25px;
+      }
+      .status {
+        margin: 15px 0;
+        font-size: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+      }
+      .label {
+        color: #444;
+        font-weight: 600;
+      }
+      .value {
+        font-weight: bold;
+        color: #007acc;
+      }
+      .value::before {
+        content: "🔍 ";
+      }
+      .slot {
+        font-size: 20px;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #007a33;
+        background-color: #e3fcec;
+        padding: 10px;
+        border-radius: 8px;
+      }
+      .btn {
+        padding: 12px 24px;
+        margin: 12px 6px;
+        border: none;
+        background-color: #007acc;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .btn:hover {
+        background-color: #005fa3;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📡 Monitoring IR & Servo</h1>
+
+      <div class="status">
+        <span class="label">Sensor IR:</span>
+        <span class="value" id="irStatus">-</span>
+      </div>
+
+      <div class="status">
+        <span class="label">Status Servo:</span>
+        <span class="value" id="servoStatus">-</span>
+      </div>
+
+      <div class="slot">
+        🚗 Mobil Terparkir: <span id="slotTerpakai">0</span>
+      </div>
+
+      <div style="margin-top: 20px">
+        <button class="btn" onclick="kirim('BUKA')">Buka Servo</button>
+        <button class="btn" onclick="kirim('TUTUP')">Tutup Servo</button>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/mqttws31.min.js"></script>
+    <script>
+      const clientID = "webClient_" + Math.floor(Math.random() * 10000);
+      const client = new Paho.MQTT.Client("broker.hivemq.com", 8000, clientID);
+
+      let slotTerpakai = 0;
+      let irSebelumnya = "TIDAK ADA";
+
+      client.onConnectionLost = (response) => {
+        console.log("Koneksi MQTT putus: ", response.errorMessage);
+      };
+
+      client.onMessageArrived = (message) => {
+        console.log("Pesan:", message.destinationName, message.payloadString);
+
+        if (message.destinationName === "iot/parking/ir") {
+          const irStatus = message.payloadString;
+          document.getElementById("irStatus").textContent = irStatus;
+
+          if (irStatus === "ADA" && irSebelumnya === "TIDAK ADA") {
+            slotTerpakai++;
+          } else if (
+            irStatus === "TIDAK ADA" &&
+            irSebelumnya === "ADA" &&
+            slotTerpakai > 0
+          ) {
+            slotTerpakai--;
+          }
+
+          irSebelumnya = irStatus;
+          document.getElementById("slotTerpakai").textContent = slotTerpakai;
+        }
+
+        if (message.destinationName === "iot/parking/servo") {
+          document.getElementById("servoStatus").textContent =
+            message.payloadString;
+        }
+      };
+
+      client.connect({
+        onSuccess: () => {
+          console.log("✅ Web MQTT Terhubung!");
+          client.subscribe("iot/parking/ir");
+          client.subscribe("iot/parking/servo");
+        },
+        onFailure: (err) => {
+          console.error("Gagal konek ke MQTT Broker:", err.errorMessage);
+        },
+      });
+
+      function kirim(perintah) {
+        const pesan = new Paho.MQTT.Message(perintah);
+        pesan.destinationName = "iot/parking/control";
+        client.send(pesan);
+        console.log("Perintah dikirim:", perintah);
+      }
+    </script>
+  </body>
+</html>
